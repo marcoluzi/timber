@@ -328,6 +328,21 @@ class ImageHelper
         self::process_delete_generated_files($filename, $ext, $dir, '-lbox-[0-9999999]*', '-lbox-[0-9]*x[0-9]*-[a-zA-Z0-9]*.');
         self::process_delete_generated_files($filename, 'jpg', $dir, '-tojpg.*');
         self::process_delete_generated_files($filename, 'jpg', $dir, '-tojpg-[0-9999999]*');
+
+        // Additional deletion logic for new file formats (opt‑in):
+        $advanced = \apply_filters('timber/image/advanced_file_names', false);
+        if ($advanced) {
+            // Delete generated WEBP files (new naming adds "-towebp")
+            self::process_delete_generated_files($filename, 'webp', $dir, '-towebp.*');
+            self::process_delete_generated_files($filename, 'webp', $dir, '-towebp-[0-9999999]*');
+
+            // Additionally, if the original filename contains a "-scaled" suffix, also delete generated files for both JPG and WEBP.
+            $filename_without_scaled = str_replace('-scaled', '', $filename);
+            self::process_delete_generated_files($filename_without_scaled, 'jpg', $dir, '-tojpg.*');
+            self::process_delete_generated_files($filename_without_scaled, 'jpg', $dir, '-tojpg-[0-9999999]*');
+            self::process_delete_generated_files($filename_without_scaled, 'webp', $dir, '-towebp.*');
+            self::process_delete_generated_files($filename_without_scaled, 'webp', $dir, '-towebp-[0-9999999]*');
+        }
     }
 
     /**
